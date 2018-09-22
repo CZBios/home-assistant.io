@@ -124,3 +124,49 @@ Additional examples of using IFTTT channels can be found below.
 Channel | Description
 ----- | -----
 [Manything](/components/ifttt.manything/) | Automates turning recording ON and OFF based on Home Assistant AWAY and HOME values.
+
+### {% linkable_title Sending events from IFTTT to Home Assistant - first example %}
+If you want to make your first example you could take following steps. Dont forget you have to have public IP. Maker channel service on IFTTT is no more, no its called Webhook. 
+
+We will do simple first test, when we will manually call IFTTT applet with an even, and than IFTTT will call back in to the specific script, which we will create. 
+
+### {% linkable_title Create first script %}
+We will use a Home assistant UI. Go to the sidebar and choose Settings -> Scripts. Click on bottom left icon and create **New script**. 
+Name of the script is up to you. It doesnt matter in this case. 
+
+In **Sequence** part choose action:call service, service:system_log.write. 
+In the data field paste this: 
+{% raw %}
+{
+  "message": "test ifttt IN"
+}
+{% endraw %}
+Hit Save. 
+Now go to Configuration and locate file **scripts.yaml**. You should see your first script. 
+{% raw %}
+'<SCRIPT ID>':
+  alias: myscriptname
+  sequence:
+  - data:
+      message: test ifttt IN
+    service: system_log.write
+{% endraw %}
+
+### {% linkable_title Create IFTTT applet with webhooks %}
+If **THIS** choose Webhooks and choose receive request. In the field "Event name" write "test in". This will be your event name, which you will call and thus initiate and action from HA to IFTTT and back to HA. 
+
+than **THAT** choose Webhooks again. Now you need to put your URL. Use your own values. 
+{% raw %}
+   http://<IP ADDRESS>:8123/api/services/script/<SCRIPT ID>?api_password=<PASS>
+{% endraw %}
+Choose method: POST, type: application/json and you can leave body empty. 
+Finish the applet. 
+  
+### {% linkable_title Test it %}  
+Now go back to your HA and click in sidebar on service. From dropdown menu choose service "ifttt:trigger" and put following json data
+{% raw %}
+   {"event": "test in"}
+{% endraw %}
+Now hit the button "Call service". 
+
+If you did everything right you should be able in few seconds see in your system log message you configured in the script before. In this case "test ifttt IN". 
